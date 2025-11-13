@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Expense Tracker — INR, Save Append, Running Expenses</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- React + ReactDOM (development builds) -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel to compile JSX in browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Icon set -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --bg:  white;
+      --muted: #9aa4bf;
+      --accent1: #06b6d4;
+      --accent2: #3b82f6;
+      --glass: white;
+      --card-hover: white;
+    }
+    * { box-sizing: border-box; }
+    html,body { height:100%; margin:0; font-family:'Inter',system-ui,-apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:
+      radial-gradient(1000px 500px at 10% 10%, rgba(59,130,246,0.05), transparent),
+      linear-gradient(180deg,#071025 0%, #081429 35%, #071221 100%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap { max-width:1100px; margin:36px auto; padding:20px; }
+
+    header { display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .brand { display:flex; gap:12px; align-items:center; }
+    .logo { width:56px; height:56px; border-radius:12px; background:linear-gradient(90deg,var(--accent1),var(--accent2)); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 22px rgba(59,130,246,0.16); }
+    .logo i { color:white; font-size:20px; }
+    .brand h1 { margin:0; font-size:20px; letter-spacing:-0.2px; line-height:1; }
+    .brand p { margin:0; font-size:12px; color:var(--muted); margin-top:4px; }
+
+    .top-controls { display:flex; gap:8px; align-items:center; }
+
+    button.btn { background: linear-gradient(90deg,var(--accent1),var(--accent2)); border: none; padding:10px 14px; border-radius:10px; color:white; cursor:pointer; font-weight:600; box-shadow:0 6px 18px rgba(59,130,246,0.14); transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease; }
+    button.btn:hover { transform: translateY(-3px); }
+    button.ghost { background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted); padding:8px 12px; border-radius:10px; }
+    .small { padding:6px 10px; font-size:13px; }
+
+    .grid { display:grid; grid-template-columns: 1fr 380px; gap:18px; }
+
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px; padding:18px; box-shadow: 0 8px 30px rgba(2,6,23,0.6); border: 1px solid rgba(255,255,255,0.03); }
+
+    .summary { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; }
+    .balance { display:flex; flex-direction:column; min-width:220px; }
+    .balance small { color:var(--muted); font-size:13px; }
+    .balance h2 { margin:6px 0 0; font-size:28px; }
+
+    .tiles { display:flex; gap:10px; align-items:center; }
+    .tile { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006)); padding:12px 14px; border-radius:10px; min-width:140px; text-align:left; border:1px solid rgba(255,255,255,0.02); }
+    .tile small { color:var(--muted); font-size:12px; display:block; }
+    .tile strong { display:block; margin-top:6px; font-size:18px; }
+
+    .form { display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+    .form input[type="text"], .form input[type="number"], .form input[type="date"], .form select {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      color: #e6eef8;
+      padding:10px 12px; border-radius:10px; outline:none; min-width:140px;
+      transition: border .12s ease, box-shadow .12s ease;
+    }
+    .form input:focus, .form select:focus { box-shadow: 0 6px 20px rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.28); }
+
+    .sidebar { display:flex; flex-direction:column; gap:12px; }
+
+    .filters { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+    .filters input { min-width:160px; }
+
+    .list { margin-top:14px; display:flex; flex-direction:column; gap:10px; max-height:520px; overflow:auto; padding-right:6px; }
+    .item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006)); border: 1px solid rgba(255,255,255,0.02); transition: transform .12s ease, background .12s ease; }
+    .item:hover { transform: translateY(-4px); background: var(--card-hover); }
+    .left { display:flex; gap:12px; align-items:center; }
+    .chip { padding:8px 10px; border-radius:10px; font-weight:700; font-size:13px; color:#07263d; min-width:72px; text-align:center; }
+    .desc { font-weight:700; font-size:15px; color:#e6eef8; }
+    .meta { font-size:13px; color:var(--muted); margin-top:4px; }
+    .amount { font-weight:800; min-width:120px; text-align:right; font-size:15px; }
+    .amount.negative { color:#fecaca; } /* pinkish for expense */
+    .amount.positive { color:#bbf7d0; } /* light green */
+    .actions { display:flex; gap:8px; align-items:center; }
+    .action-btn { background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); padding:8px 10px; border-radius:8px; cursor:pointer; }
+    .action-btn:hover { color:white; border-color: white; }
+
+    .cat-Food { background: linear-gradient(180deg,#ffe7e6,#ffd6d2); color:#7f1d1d; }
+    .cat-Transport { background: linear-gradient(180deg,#e6f8ff,#d0f0ff); color:#034155; }
+    .cat-Shopping { background: linear-gradient(180deg,#fff7ed,#ffedd5); color:#7c2d12; }
+    .cat-Rent { background: linear-gradient(180deg,#eef2ff,#e6edff); color:#3730a3; }
+    .cat-Bills { background: linear-gradient(180deg,#fff1f2,#ffebee); color:#9f1239; }
+    .cat-Salary { background: linear-gradient(180deg,#ecfccb,#eaffd5); color:#365314; }
+    .cat-Other { background: linear-gradient(180deg,#f3f4f6,#eef2f6); color:#334155; }
+
+    footer { margin-top:18px; text-align:center; color:var(--muted); font-size:13px; }
+
+    @media (max-width:980px) {
+      .grid { grid-template-columns: 1fr; }
+      .sidebar { order:2; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"><i class="fa-solid fa-wallet"></i></div>
+        <div>
+          <h1>Expense Tracker</h1>
+          <p>INR • LocalStorage • React (CDN) • No install</p>
+        </div>
+      </div>
+
+      <div class="top-controls">
+        <button class="btn small" id="sampleBtn"><i class="fa-solid fa-dice" style="margin-right:8px"></i>Sample</button>
+        <button class="ghost small" id="clearBtn"><i class="fa-solid fa-trash" style="margin-right:8px"></i>Clear</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: main -->
+      <div class="card">
+        <div class="summary">
+          <div class="balance">
+            <small>Current Balance</small>
+            <h2 id="balance">₹0.00</h2>
+            <div style="color:var(--muted); margin-top:8px; font-size:13px">Balance = Income (recorded + adjusted) + Expenses</div>
+          </div>
+
+          <div class="tiles" role="region" aria-label="financial summary">
+            <div class="tile">
+              <small>Income (recorded)</small>
+              <strong id="incomeRecorded">₹0.00</strong>
+            </div>
+
+            <div class="tile">
+              <small>Income (adjust)</small>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+                <input id="incomeAdjustInput" type="number" step="0.01" style="background:transparent; border:1px solid rgba(255,255,255,0.04); color:inherit; padding:6px 8px; border-radius:8px; width:120px;" placeholder="₹0.00" />
+                <button class="small btn" id="applyIncomeBtn" style="padding:6px 10px;">Apply</button>
+              </div>
+              <div style="margin-top:8px; font-size:13px; color:var(--muted)">Adjustment saved locally</div>
+            </div>
+
+            <div class="tile">
+              <small>Expenses (total spent)</small>
+              <strong id="expenses">₹0.00</strong>
+            </div>
+          </div>
+        </div>
+
+        <form class="form" id="entryForm">
+          <input id="desc" type="text" placeholder="Description" required />
+          <input id="amount" type="number" placeholder="Amount (use negative for expense)" step="0.01" required />
+          <select id="category">
+            <option>Food</option><option>Transport</option><option>Shopping</option><option>Rent</option><option>Bills</option><option>Salary</option><option>Other</option>
+          </select>
+          <input id="date" type="date" />
+          <button type="submit" class="btn">Save</button>
+        </form>
+
+        <div class="filters" style="margin-top:12px;">
+          <input id="search" type="text" placeholder="Search description..." style="padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); min-width:220px;" />
+          <select id="filterCat" style="padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+            <option value="All">All categories</option>
+            <option>Food</option><option>Transport</option><option>Shopping</option><option>Rent</option><option>Bills</option><option>Salary</option><option>Other</option>
+          </select>
+          <div style="margin-left:auto; color:var(--muted); align-self:center;" id="entriesCount">Entries: 0</div>
+        </div>
+
+        <div class="list" id="list"></div>
+
+        <div style="margin-top:12px;">
+          <strong style="color:#e6eef8">Totals by category (filtered)</strong>
+          <div id="catTotals" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; color:var(--muted)"></div>
+        </div>
+
+      </div>
+
+      <!-- Right: sidebar -->
+      <div class="sidebar">
+        <div class="side-card card" style="padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <small style="color:var(--muted)">Quick actions</small>
+              <div style="font-weight:700; margin-top:6px">Export / Import</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+            <button id="exportBtn" class="ghost small">Export JSON</button>
+            <label class="ghost small" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+              <i class="fa-solid fa-file-import"></i>
+              <input type="file" id="importFile" accept=".json" style="display:none" />
+              Import JSON
+            </label>
+          </div>
+
+          <div style="margin-top:14px; color:var(--muted); font-size:13px;">
+            Tip: Use positive amounts for income, negative amounts for expenses. Adjust Income adds to recorded income in balance.
+          </div>
+        </div>
+
+        <div class="side-card card" style="padding:16px;">
+          <div style="font-weight:700">Shortcuts</div>
+          <ul style="color:var(--muted); margin-top:8px; padding-left:18px;">
+            <li>Click <strong>Edit</strong> to modify an entry</li>
+            <li>Click <strong>Delete</strong> to remove</li>
+            <li>Use <strong>Sample</strong> to load sample dataset</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <footer>Built with React (CDN) — data saved in browser localStorage • Currency: INR</footer>
+  </div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    const uid = () => Math.random().toString(36).slice(2,9);
+    const STORAGE_KEY = 'expense-tracker-inr-v1';
+    const STORAGE_INCOME_ADJ = 'expense-tracker-inr-income-adj';
+
+    function formatINR(n) {
+      const num = Number(n) || 0;
+      return num.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
+    }
+
+    function App() {
+      const [items, setItems] = useState(() => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          console.error(e);
+          return [];
+        }
+      });
+
+      const [incomeAdjust, setIncomeAdjust] = useState(() => {
+        try {
+          const raw = localStorage.getItem(STORAGE_INCOME_ADJ);
+          return raw ? Number(raw) : 0;
+        } catch (e) { return 0; }
+      });
+
+      // persist
+      useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      }, [items]);
+      useEffect(() => {
+        localStorage.setItem(STORAGE_INCOME_ADJ, String(incomeAdjust || 0));
+      }, [incomeAdjust]);
+
+      // derived totals
+      const totals = useMemo(() => {
+        const income = items.filter(i => Number(i.amount) > 0).reduce((s,a) => s + Number(a.amount), 0);
+        const expense = items.filter(i => Number(i.amount) < 0).reduce((s,a) => s + Number(a.amount), 0);
+        const balance = income + expense;
+        return { income, expense, balance };
+      }, [items]);
+
+      const [search, setSearch] = useState('');
+      const [filterCat, setFilterCat] = useState('All');
+      const [editId, setEditId] = useState(null);
+
+      function addOrUpdateEntry(entry) {
+        if (entry.id) {
+          setItems(prev => prev.map(it => it.id === entry.id ? entry : it));
+        } else {
+          entry.id = uid();
+          // append to the end so new entries show below totals (as you requested)
+          setItems(prev => [...prev, entry]);
+        }
+      }
+
+      function removeEntry(id) {
+        setItems(prev => prev.filter(it => it.id !== id));
+      }
+
+      function startEdit(id) {
+        const it = items.find(x => x.id === id);
+        if (!it) return;
+        setEditId(id);
+        document.getElementById('desc').value = it.desc;
+        document.getElementById('amount').value = it.amount;
+        document.getElementById('category').value = it.category || 'Other';
+        document.getElementById('date').value = it.date || new Date().toISOString().slice(0,10);
+      }
+
+      function clearAll() {
+        if (!confirm('Clear all entries?')) return;
+        setItems([]);
+        setEditId(null);
+      }
+
+      function loadSample() {
+        const sample = [
+          { id: uid(), desc: 'Grocery', amount: -1450.50, category:'Food', date:'2025-11-10' },
+          { id: uid(), desc: 'Salary', amount: 50000, category:'Salary', date:'2025-11-01' },
+          { id: uid(), desc: 'Bus ticket', amount: -25.5, category:'Transport', date:'2025-11-09' },
+          { id: uid(), desc: 'Shoes', amount: -3000, category:'Shopping', date:'2025-10-28' },
+        ];
+        setItems(sample);
+      }
+
+      function exportJSON() {
+        const blob = new Blob([JSON.stringify({ items, incomeAdjust }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'expenses-inr.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function importJSON(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const parsed = JSON.parse(e.target.result);
+            if (Array.isArray(parsed.items)) {
+              setItems(parsed.items);
+            } else {
+              alert('Invalid file format');
+            }
+            if (parsed.incomeAdjust !== undefined) setIncomeAdjust(Number(parsed.incomeAdjust) || 0);
+          } catch (err) {
+            alert('Failed to parse JSON');
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      const filtered = items.filter(it => {
+        if (search && !it.desc.toLowerCase().includes(search.toLowerCase())) return false;
+        if (filterCat !== 'All' && it.category !== filterCat) return false;
+        return true;
+      });
+
+      const byCategory = filtered.reduce((acc, it) => {
+        acc[it.category] = (acc[it.category] || 0) + Number(it.amount);
+        return acc;
+      }, {});
+
+      // bind DOM controls once
+      useEffect(() => {
+        const form = document.getElementById('entryForm');
+        const desc = document.getElementById('desc');
+        const amount = document.getElementById('amount');
+        const category = document.getElementById('category');
+        const date = document.getElementById('date');
+
+        function onSubmit(e) {
+          e.preventDefault();
+          if (!desc.value.trim() || amount.value === '') {
+            alert('Please enter description and amount.');
+            return;
+          }
+          const payload = {
+            id: editId || null,
+            desc: desc.value.trim(),
+            amount: Number(amount.value),
+            category: category.value,
+            date: date.value || new Date().toISOString().slice(0,10)
+          };
+          addOrUpdateEntry(payload);
+          setEditId(null);
+          desc.value = '';
+          amount.value = '';
+          category.value = 'Food';
+          date.value = new Date().toISOString().slice(0,10);
+        }
+
+        form.addEventListener('submit', onSubmit);
+
+        const searchEl = document.getElementById('search');
+        const filterEl = document.getElementById('filterCat');
+        function onSearch() { setSearch(searchEl.value); }
+        function onFilter() { setFilterCat(filterEl.value); }
+        searchEl.addEventListener('input', onSearch);
+        filterEl.addEventListener('change', onFilter);
+
+        document.getElementById('sampleBtn').onclick = loadSample;
+        document.getElementById('clearBtn').onclick = clearAll;
+
+        document.getElementById('exportBtn').onclick = exportJSON;
+        const inputFile = document.getElementById('importFile');
+        inputFile.onchange = (e) => {
+          const f = e.target.files[0];
+          if (f) importJSON(f);
+          e.target.value = '';
+        };
+
+        const incomeInput = document.getElementById('incomeAdjustInput');
+        const applyBtn = document.getElementById('applyIncomeBtn');
+        incomeInput.value = incomeAdjust || '';
+        applyBtn.onclick = () => {
+          const val = Number(incomeInput.value) || 0;
+          setIncomeAdjust(val);
+          alert('Income adjustment applied: ' + formatINR(val));
+        };
+
+        return () => {
+          form.removeEventListener('submit', onSubmit);
+          searchEl.removeEventListener('input', onSearch);
+          filterEl.removeEventListener('change', onFilter);
+        };
+      }, [addOrUpdateEntry, editId, incomeAdjust]); // eslint-disable-line
+
+      // update DOM when data changes
+      useEffect(() => {
+        const incomeRecordedEl = document.getElementById('incomeRecorded');
+        const expensesEl = document.getElementById('expenses');
+        const balanceEl = document.getElementById('balance');
+        const entriesCount = document.getElementById('entriesCount');
+        incomeRecordedEl.textContent = formatINR(totals.income);
+        expensesEl.textContent = formatINR(Math.abs(totals.expense));
+        const finalBalance = totals.income + (Number(incomeAdjust) || 0) + totals.expense;
+        balanceEl.textContent = formatINR(finalBalance);
+        entriesCount.textContent = 'Entries: ' + items.length;
+
+        // render list and compute running cumulative expense
+        const listEl = document.getElementById('list');
+        listEl.innerHTML = '';
+        if (filtered.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'card';
+          empty.style.padding = '18px';
+          empty.style.textAlign = 'center';
+          empty.style.color = 'var(--muted)';
+          empty.textContent = 'No entries — add your first expense or load sample data.';
+          listEl.appendChild(empty);
+        } else {
+          // we want cumulative expense "up to that moment" — iterate in order and track cumulative
+          let cumulativeExpense = 0;
+          filtered.forEach(it => {
+            // if amount is negative, add to cumulative (expenses are negative)
+            if (Number(it.amount) < 0) cumulativeExpense += Number(it.amount); // negative sum
+            const item = document.createElement('div');
+            item.className = 'item';
+
+            const left = document.createElement('div');
+            left.className = 'left';
+
+            const chip = document.createElement('div');
+            chip.className = 'chip ' + 'cat-' + (it.category || 'Other');
+            chip.textContent = it.category || 'Other';
+
+            const meta = document.createElement('div');
+            const desc = document.createElement('div');
+            desc.className = 'desc';
+            desc.textContent = it.desc;
+
+            const md = document.createElement('div');
+            md.className = 'meta';
+            md.textContent = (it.date || '') + ' • ' + formatINR(Number(it.amount));
+
+            // cumulative display
+            const cumDiv = document.createElement('div');
+            cumDiv.className = 'meta';
+            // show absolute value for readability (spent so far)
+            cumDiv.textContent = 'Spent so far: ' + formatINR(Math.abs(cumulativeExpense));
+
+            meta.appendChild(desc);
+            meta.appendChild(md);
+            meta.appendChild(cumDiv);
+
+            left.appendChild(chip);
+            left.appendChild(meta);
+
+            const right = document.createElement('div');
+            right.style.display = 'flex';
+            right.style.alignItems = 'center';
+            right.style.gap = '8px';
+
+            const amount = document.createElement('div');
+            amount.className = 'amount ' + (Number(it.amount) < 0 ? 'negative' : 'positive');
+            amount.textContent = formatINR(Number(it.amount));
+
+            const actions = document.createElement('div');
+            actions.className = 'actions';
+            const editBtn = document.createElement('button');
+            editBtn.className = 'action-btn';
+            editBtn.textContent = 'Edit';
+            editBtn.onclick = () => startEdit(it.id);
+            const delBtn = document.createElement('button');
+            delBtn.className = 'action-btn';
+            delBtn.textContent = 'Delete';
+            delBtn.onclick = () => {
+              if (confirm('Delete this entry?')) removeEntry(it.id);
+            };
+
+            actions.appendChild(editBtn);
+            actions.appendChild(delBtn);
+
+            right.appendChild(amount);
+            right.appendChild(actions);
+
+            item.appendChild(left);
+            item.appendChild(right);
+
+            listEl.appendChild(item);
+          });
+        }
+
+        // category totals
+        const catTotalsEl = document.getElementById('catTotals');
+        catTotalsEl.innerHTML = '';
+        if (Object.keys(byCategory).length === 0) {
+          catTotalsEl.textContent = '—';
+        } else {
+          Object.entries(byCategory).forEach(([k,v]) => {
+            const b = document.createElement('div');
+            b.style.padding = '6px 8px';
+            b.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006))';
+            b.style.border = '1px solid rgba(255,255,255,0.02)';
+            b.style.borderRadius = '8px';
+            b.style.color = 'var(--muted)';
+            b.textContent = k + ': ' + formatINR(v);
+            catTotalsEl.appendChild(b);
+          });
+        }
+
+      }, [items, filtered, totals, incomeAdjust, byCategory]);
+
+      return null;
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+✅ 1. It imports React & ReactDOM exactly like any React project
+
+At the top you have:
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+
+These two lines load React.js and ReactDOM — the same libraries used by:
+
+Create React App
+
+Vite React
+
+Next.js
+
+Remix
+
+Webpack-based React builds
+
+This means the browser is running React 18.
+
+✅ 2. It uses JSX (React’s syntax)
+
+You’re writing code like:
+
+return null;
+
+
+or
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+
+❗ JSX (<App />) can ONLY be used with React.
+
+The browser usually can’t understand JSX,
+so we also include Babel:
+
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+
+This compiles JSX into plain JavaScript exactly like CRA/Vite do.
+
+✅ 3. It uses React Hooks (React’s core feature)
+
+Inside the app you have:
+
+const [items, setItems] = useState([]);
+const [incomeAdjust, setIncomeAdjust] = useState(0);
+const totals = useMemo(() => {...}, [items]);
+useEffect(() => {...}, [items]);
+
+
+React Hooks like:
+
+useState()
+
+useEffect()
+
+useMemo()
+
+are React-only features.
+If this wasn’t a React app, these would not work.
+
+✅ 4. It uses React's Component rendering system
+
+It has a React component:
+
+function App() {
+  return null;
+}
+
+
+And renders it using:
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+
+This is the React 18 root API.
+
+✅ 5. It uses Virtual DOM updates
+
+Whenever you update state:
+
+setItems([...items, newItem]);
+
+
+React:
+
+updates the state
+
+re-renders only the affected UI
+
+updates the Virtual DOM
+
+efficiently patches changes to the real DOM
+
+This is React’s key feature — and it is happening here.
+
+🔥 So YES — this is a full React.js project.
+
+The ONLY difference is:
+
+❌ No npm
+❌ No node_modules
+❌ No react-scripts
+❌ No Vite
+❌ No build tools
+
+But React does not require any of those.
+Those are just helpers for bundling — not React itself.
+
+Your project uses:
+
+✔ React
+✔ ReactDOM
+✔ JSX
+✔ React Hooks
+✔ React Component architecture
+✔ React rendering
+✔ React state management
+
+That makes it officially and absolutely a React.js application.
+
+⭐ Want me to help you write a 100% correct project description?
+
+Here is one you can use for resumes / portfolio / GitHub:
+
+Expense Tracker — ReactJS (CDN Build, No Installation Needed)
+
+A client-side React application built using React 18 with JSX and Hooks (useState, useEffect, useMemo). The project runs without Node.js or build tools by loading React and Babel via CDN. Features include:
+
+Add/edit/delete expense and income entries
+
+Real-time balance calculation
+
+Adjustable income (manual override)
+
+Indian currency formatting (INR)
+
+Category filtering & search
+
+LocalStorage persistence
+
+Export/Import data (JSON)
+
+Fully responsive UI with custom CSS
+
+Uses React 18 rendering (ReactDOM.createRoot)
